@@ -53,30 +53,34 @@ class _SplashState extends State<Splash> {
 
     if (FirebaseAuth.instance.currentUser == null) {
       final providers = [EmailAuthProvider()];
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SignInScreen(
-            providers: providers,
-            actions: [
-              AuthStateChangeAction<SignedIn>((context, state) {
-                //Goto to Home
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (context) => Home()));
-              }),
-              AuthStateChangeAction<UserCreated>((context, state) {
-                //Goto to Home
-                Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (context) => Home()));
-              }),
-            ],
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SignInScreen(
+              providers: providers,
+              actions: [
+                AuthStateChangeAction<SignedIn>((context, state) {
+                  //Goto to Home
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => const Home()));
+                }),
+                AuthStateChangeAction<UserCreated>((context, state) {
+                  //Goto to Home
+                  Navigator.pushReplacement(context,
+                      MaterialPageRoute(builder: (context) => const Home()));
+                }),
+              ],
+            ),
           ),
-        ),
-      );
+        );
+      }
     } else {
       //Goto to Home
-      Navigator.pushReplacement(
-          context, MaterialPageRoute(builder: (context) => Home()));
+      if (mounted) {
+        Navigator.pushReplacement(
+            context, MaterialPageRoute(builder: (context) => const Home()));
+      }
     }
 
     status = "Carregant (100%)";

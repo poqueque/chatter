@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../models/message.dart';
@@ -17,15 +18,24 @@ class MessageProvider extends ChangeNotifier {
           messages.add(message);
         }
       }
+      messages.sort();
       notifyListeners();
     });
   }
 
-  void addMessage(Message message) {
+  void addMessage(String text) {
+    var authorName = FirebaseAuth.instance.currentUser!.displayName ?? "Anònim";
+    if (authorName.isEmpty) authorName = "Anònim";
+
+    Message message = Message(
+        authorId: FirebaseAuth.instance.currentUser!.uid,
+        authorName: authorName,
+        text: text,
+        dateTime: DateTime.now());
     messages.add(message);
     db.collection("messages").add(message.toFirestore()).then(
         (documentSnapshot) =>
-            print("Added Data with ID: ${documentSnapshot.id}"));
+            debugPrint("Added Data with ID: ${documentSnapshot.id}"));
     notifyListeners();
   }
 }
