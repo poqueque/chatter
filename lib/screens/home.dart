@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:chat_bubbles/chat_bubbles.dart';
 import 'package:chatter/dialogs/dialog.dart';
 import 'package:chatter/providers/message_provider.dart';
+import 'package:chatter/screens/pdf_viewer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 
 import '../styles/app_styles.dart';
@@ -65,6 +67,53 @@ class _HomeState extends State<Home> {
                       .updatePhotoURL(photoURL);
                   setState(() {});
                 }
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.picture_as_pdf),
+              title: const Text("Obrir PDF"),
+              onTap: () async {
+                Reference ref = FirebaseStorage.instance
+                    .ref()
+                    .child('pdf')
+                    .child('01-CincPometes.pdf');
+
+                final Directory tempDir = await getTemporaryDirectory();
+                File tempFile = File("${tempDir.path}/temp.pdf");
+
+                final downloadTask = ref.writeToFile(tempFile);
+                downloadTask.snapshotEvents.listen((taskSnapshot) {
+                  switch (taskSnapshot.state) {
+                    case TaskState.running:
+                      debugPrint("Descargando PDF");
+                      break;
+                    case TaskState.paused:
+                      debugPrint("Pausando PDF");
+                      break;
+                    case TaskState.success:
+                      Navigator.pop(context);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) =>
+                                  PdfViewer(pdfPath: tempFile.path)));
+                      break;
+                    case TaskState.canceled:
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Error descargando PDF"),
+                        ),
+                      );
+                      break;
+                    case TaskState.error:
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Error descargando PDF"),
+                        ),
+                      );
+                      break;
+                  }
+                });
               },
             ),
             const Spacer(),
