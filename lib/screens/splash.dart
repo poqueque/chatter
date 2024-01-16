@@ -1,8 +1,11 @@
 import 'package:chatter/styles/app_styles.dart';
 import 'package:firebase_auth/firebase_auth.dart' hide EmailAuthProvider;
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../providers/firebase_provider.dart';
 import 'home.dart';
 
 class Splash extends StatefulWidget {
@@ -41,9 +44,16 @@ class _SplashState extends State<Splash> {
   }
 
   Future<void> init() async {
+    Provider.of<FirebaseProvider>(context, listen: false).init();
     await Future.delayed(const Duration(milliseconds: 500));
     status = "Carregant (25%)";
     setState(() {});
+    NotificationSettings settings =
+        await FirebaseMessaging.instance.requestPermission();
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      debugPrint("Podem enviar missatges");
+    }
+
     await Future.delayed(const Duration(milliseconds: 500));
     status = "Carregant (50%)";
     setState(() {});
